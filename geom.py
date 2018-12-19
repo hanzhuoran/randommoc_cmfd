@@ -238,13 +238,12 @@ def pos_plane(plane,ray):
 
 def tally_current(pln,ray,current_filter_x,current_filter_y):
 
+    # this index in the mesh index on the chosen plane
     index = 0
 
     if pln.B ==0 and pln.A != 0:
         #  x plane, vertical, use ybd_list
         # cos = ray.u
-        # print("ray.psi")
-        # print(ray.psi)
         ID = pln.id
         for i in range(NY):
             if ray.y <= ybd_list[i] and ray.y > ybd_list[i+1]:
@@ -254,12 +253,7 @@ def tally_current(pln,ray,current_filter_x,current_filter_y):
                 index = NY
         current_filter_x[ID,index,:] = current_filter_x[ID,index,:] + \
                                         ray.psi*ray.u*2*np.pi
-        # print("current_filter_x")
-        # print(current_filter_x)
-        # if ray.u > 0:
-        #     current_filter_x[ID,index,:] = current_filter_x[ID,index,:] + 2*np.pi*ray.psi
-        # else:
-        #     current_filter_x[ID,index,:] = current_filter_x[ID,index,:] - 2*np.pi*ray.psi
+
     elif pln.A == 0 and pln.B != 0:
         #  y plane, horizontal, use xbd_list
         #  cos = ray.v
@@ -272,8 +266,3 @@ def tally_current(pln,ray,current_filter_x,current_filter_y):
                 index = NX
         current_filter_y[ID,index,:] = current_filter_y[ID,index,:] + \
                                         ray.psi*ray.v*2*np.pi
-        # if ray.v > 0:
-        #     current_filter_y[ID,index,:] = current_filter_y[ID,index,:] + 2*np.pi*ray.psi
-        # else:
-        #     current_filter_y[ID,index,:] = current_filter_y[ID,index,:] - 2*np.pi*ray.psi
-

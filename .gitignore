@@ -1,0 +1,6 @@
+*.out
+*.txt
+*.xlsx
+*.png
+__pycache__
+.DS_Store

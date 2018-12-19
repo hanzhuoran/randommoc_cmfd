@@ -36,12 +36,12 @@ def set_geometry(flag):
         else: 
             ybd[j] = Plane(0,1,0,ybd_list[j],"transmission",NX+j+1)
 
-    # zbd = np.empty(2,dtype=Plane)
-    # zbd[0] = Plane(0,0,1,sidelengthZ/2,"reflection",NX+1+NY+1)
-    # zbd[1] = Plane(0,0,1,-sidelengthZ/2,"reflection",NX+1+NY+2)
+    zbd = np.empty(2,dtype=Plane)
+    zbd[0] = Plane(0,0,1,sidelengthZ/2,"reflection",NX+1+NY+1)
+    zbd[1] = Plane(0,0,1,-sidelengthZ/2,"reflection",NX+1+NY+2)
 
     pln_list = np.append(xbd,ybd)
-    # pln_list = np.append(pln_list,zbd)
+    pln_list = np.append(pln_list,zbd)
     boxlist = determine_boxlist(xbd,ybd)
     cyl_list = np.empty((NY,NX,n_rings),dtype=Surface)
     

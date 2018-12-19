@@ -73,6 +73,9 @@ elif n_rings == 0:
 sidelengthX = pitch*NX
 sidelengthY = pitch*NY
 sidelengthZ = 20
+latticebox = [sidelengthX/2, sidelengthY/2, sidelengthZ/2,
+             -sidelengthX/2, -sidelengthY/2, -sidelengthZ/2]
+             
 vol_cell = sidelengthY**2*sidelengthZ
 VTOT= sidelengthX*sidelengthY*sidelengthZ
 STOT = (sidelengthX*sidelengthZ)*2+\
@@ -80,12 +83,8 @@ STOT = (sidelengthX*sidelengthZ)*2+\
         (sidelengthY*sidelengthY)*2
 S_V_ratio = STOT/VTOT
 theo_left = (sidelengthY*sidelengthZ)/STOT
-# print(theo_left)
 theo_up = (sidelengthX*sidelengthZ)/STOT
-# print(theo_up)
 theo_top = (sidelengthX*sidelengthY)/STOT
-# print(theo_top)
-
 ####################
 XSdirectory = "./XS/"
 homo_XSdirectory = "./homo_XS/"
