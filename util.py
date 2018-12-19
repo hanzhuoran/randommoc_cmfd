@@ -4,8 +4,8 @@ import random
 
 # Parameters to change
 DZ = 10
-MAX_D = 300
-N_RAYS = 200
+MAX_D = 200
+N_RAYS = 100
 n_fuel_ring = 0
 n_mod_ring = 0
 N_GROUPS = 1 # 10 or 2 groups or 1
@@ -70,11 +70,11 @@ elif n_rings == 0:
 ##########################
 sidelengthX = pitch*NX
 sidelengthY = pitch*NY
-sidelengthZ = 20
+sidelengthZ = sidelengthY
 latticebox = [sidelengthX/2, sidelengthY/2, sidelengthZ/2,
              -sidelengthX/2, -sidelengthY/2, -sidelengthZ/2]
              
-vol_cell = sidelengthY**2*sidelengthZ
+vol_cell = pitch**2*sidelengthZ
 VTOT= sidelengthX*sidelengthY*sidelengthZ
 STOT = (sidelengthX*sidelengthZ)*2+\
         (sidelengthX*sidelengthY)*2+\

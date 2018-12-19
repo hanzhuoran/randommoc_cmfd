@@ -68,7 +68,7 @@ Regions, all_surf  = set_geometry(2)
 ########################################
 
 # inital guess of k
-k = 0.603515
+k = 1
 # number of iterations
 l = 0
 
@@ -83,8 +83,26 @@ conv1 = 1
 conv2 = 1
 
 
-# while not converge:
-for l in range(1):
+# # Preset the scalar flux for testing
+# flux = np.array([0.0499228759934832,
+#                 0.0941120923671741,
+#                 0.136239071905262,
+#                 0.175380726724590,
+#                 0.210679405146194,
+#                 0.241361683844689,
+#                 0.266755309974487,
+#                 0.286303922970518,
+#                 0.299579235057431,
+#                 0.306290405556839])
+# idx = 0
+# for y in range(NY):
+#     for x in range(NX):
+#         for c in range(n_rings+1):
+#             Regions[y,x,c].set_phi(flux[idx])
+#             idx+=1
+
+while not converge:
+# for l in range(1):
 
     # Fix seed
     seed()
@@ -95,27 +113,9 @@ for l in range(1):
     print("#########################")
     print("#####iteration",l,"######")
     print("#########################")
-    # Preset the scalar flux for testing
 
-    flux = np.array([0.0499228759934832,
-                    0.0941120923671741,
-                    0.136239071905262,
-                    0.175380726724590,
-                    0.210679405146194,
-                    0.241361683844689,
-                    0.266755309974487,
-                    0.286303922970518,
-                    0.299579235057431,
-                    0.306290405556839])
-    idx = 0
-    for y in range(NY):
-        for x in range(NX):
-            for c in range(n_rings+1):
-                Regions[y,x,c].set_phi(flux[idx])
-                idx+=1
-                # print(Regions[y,x,c].phi)
 
-    input("Press Enter to continue...")
+    # input("Press Enter to continue...")
     ##Calc Q and initialize for this loop
     FissionRate = 0
     for y in range(NY):
@@ -153,9 +153,10 @@ for l in range(1):
        
         # Find the stating region of the ray 
         y, x, c = find_region(ray,Regions)
-        # Assign initial angular flux by phi/4/pi
-        init_psi = copy.deepcopy(Regions[y,x,c].phi_old)
-        init_psi /= 4*np.pi
+        # Assign initial angular flux by phi/4/pi or Q?? my q is Q/(4pi*sig_t)
+        init_psi = copy.deepcopy(Regions[y,x,c].q)
+        # init_psi = copy.deepcopy(Regions[y,x,c].phi_old)
+        # init_psi /= 4*np.pi
         init_psi = np.squeeze(np.asarray(init_psi))
         # Need to fix this. The data structure is weird for 1 group
         if N_GROUPS == 1:
@@ -368,7 +369,7 @@ for l in range(1):
                 for c in range(n_rings+1):
                     Regions[y,x,c].phi =  norm_pre[y,x,c]/ \
                                             np.linalg.norm(Regions[y,x,c].phi)
-############################################################
+###########################END CMFD#################################
 
     # Calc K-eff
     # If CMFD is off, we use need to calculate fission rate and abs rate
@@ -393,33 +394,46 @@ for l in range(1):
                 newabs = np.sum(np.multiply(Regions[y,x,c].Sig_abs.transpose(), \
                                 Regions[y,x,c].phi))
 
-                print(Regions[y,x,c].Sig_sct.transpose())
                 newsct = np.sum(np.multiply(Regions[y,x,c].Sig_sct.transpose(), \
                                 Regions[y,x,c].phi))
                 if CMFD == 0:
                     tot_FR += newnf*pitch**2*sidelengthZ
                     old_FR += oldnf*pitch**2*sidelengthZ
-                    tot_abs += newabs**pitch**2*sidelengthZ
-                    tot_sct+= newsct**pitch**2*sidelengthZ
-    
-                # print("previous fr")
-                # print( old_FR)
-    print("---------------------")
-    print("old_fission rate")  
-    print(old_FR)
-    print("fission rate")  
-    print(tot_FR)
-    print("abs rate")  
-    print(tot_abs)
-    print("sct rate")  
-    print(tot_sct)
+                    tot_abs += newabs*pitch**2*sidelengthZ
+                    tot_sct += newsct*pitch**2*sidelengthZ
 
+    # print("---------------------")
+    # # print("old_fission rate")  
+    # # print(old_FR)
+    # print("fission rate")  
+    # print(tot_FR)
+    # print("true fission rate")  
+    # print(tot_FR/k_pre)
+    # print("abs rate")  
+    # print(tot_abs)
+    # print("theoretical leakage")
+    # print(tot_FR/k_pre-tot_abs)
+
+    # print("Leakage")
+    # print(current_filter_x)
+    # # print(current_filter_y)
+
+
+    # print("check surface cnts")
+    # print(tot_hit_cnt)
+
+    # print("hits on every surfaces")
+    # for i in range(np.size(all_surf)):
+    #     print(all_surf[i].cnt)
+
+    print("---------------------")
+    print("--------Update k----------")
     print("---------------------")
     print("change in FR")
     print(np.abs(tot_FR-old_FR)/old_FR)
     if CMFD == 0:
         k = tot_FR/old_FR*k_pre
-    print("actual k:",k_pre)
+    print("pre k:",k_pre)
     print("k eff:",k)
 
     phi_new_array = np.zeros(N_REGION)
@@ -441,8 +455,8 @@ for l in range(1):
     conv1 = np.abs((k-k_pre)/k)
     conv2 = np.linalg.norm((phi_new_array-phi_old_array)/phi_new_array)
 
-    print("K_ERR",conv1)
-    print("flux",conv2)
+    # print("K_ERR",conv1)
+    # print("flux",conv2)
     # print("thermal_err",conv3)
     # print("RMSD:", RMSD)
     # print("k_pre:", k_pre)
@@ -467,8 +481,8 @@ for l in range(1):
             for c in range(n_rings+1):
                 sum += np.sum(Regions[y,x,c].phi)
     norm = sum/(NY*NX*(n_rings+1)*N_GROUPS)
-    print("norm")
-    print(norm)
+    # print("norm")
+    # print(norm)
 
 
     for y in range(NY):
