@@ -49,8 +49,8 @@ def set_geometry(flag):
     pos_y_array = np.linspace((NY-1)/2,-(NY-1)/2,NY)
     index = 0
 
-    print("n rings")
-    print(n_rings)
+    # print("n rings")
+    # print(n_rings)
     if n_rings > 0:
         for i, x in enumerate(pos_x_array):
             for j,y in enumerate(pos_y_array):
@@ -62,8 +62,9 @@ def set_geometry(flag):
         all_surf = np.append(pln_list,cyl_list)
     elif n_rings == 0:
         all_surf = pln_list
-    print("all_sruf_size")
-    print(all_surf.shape)
+
+    # print("all_sruf_size")
+    # print(all_surf.shape)
     ##########set up regions############
 
     Regions = np.empty((NY,NX,n_rings+1),dtype=Region)

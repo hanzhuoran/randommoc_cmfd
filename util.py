@@ -4,17 +4,13 @@ import random
 
 # Parameters to change
 DZ = 10
-MAX_D = 100
-N_RAYS = 20
+MAX_D = 300
+N_RAYS = 200
 n_fuel_ring = 0
 n_mod_ring = 0
-N_GROUPS = 1 # 10 or 2 groups or 1?
+N_GROUPS = 1 # 10 or 2 groups or 1
 NX = 10
 NY = 1
-# xmbd = "transmission"
-# xpbd = "transmission"
-# ymbd = "transmission"
-# ypbd = "transmission"
 xmbd = "transreflect"
 # xpbd = "transreflect"
 # ymbd = "transreflect"
@@ -23,7 +19,9 @@ xmbd = "transreflect"
 xpbd = "reflection"
 ymbd = "reflection"
 ypbd = "reflection"
-ratio = 1
+# ratio = 1
+
+
 # constant
 n_x_planes = (NX+1)
 n_y_planes = (NY+1)

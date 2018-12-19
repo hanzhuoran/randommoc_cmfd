@@ -68,7 +68,7 @@ Regions, all_surf  = set_geometry(2)
 ########################################
 
 # inital guess of k
-k = 1
+k = 0.603515
 # number of iterations
 l = 0
 
@@ -113,8 +113,9 @@ for l in range(1):
             for c in range(n_rings+1):
                 Regions[y,x,c].set_phi(flux[idx])
                 idx+=1
-                print(Regions[y,x,c].phi)
+                # print(Regions[y,x,c].phi)
 
+    input("Press Enter to continue...")
     ##Calc Q and initialize for this loop
     FissionRate = 0
     for y in range(NY):
@@ -149,6 +150,7 @@ for l in range(1):
 
         # initalize a ray
         ray = Ray(latticebox)
+       
         # Find the stating region of the ray 
         y, x, c = find_region(ray,Regions)
         # Assign initial angular flux by phi/4/pi
@@ -225,7 +227,8 @@ for l in range(1):
                     all_surf[ID].cnt +=2
                     # no need to tally current for reflective bc
 
-            elif all_surf[ID].type == "transreflect" :
+            elif all_surf[ID].type == "transreflect":
+
                 if  D > DZ and type(all_surf[ID]) is Plane:
                     tot_hit_cnt +=2
                     all_surf[ID].cnt +=2
@@ -242,24 +245,24 @@ for l in range(1):
                     tally_current(all_surf[ID],ray,current_filter_x, \
                                         current_filter_y)
 
-            ray.to_next_surf(1e-14)
+            ray.to_next_surf(1e-13)
 
-            if plot == 1:
+            if plot == 1 and ray_iter==67:
                 plt.plot([previous_x, ray.x],[previous_y, ray.y], 'bo-')
             # print("===========================")
 
     for y in range(NY):
         for x in range(NX):
             for c in range(n_rings+1):
-                print("pos")
-                print(y,x,c)
+                # print("pos")
+                # print(y,x,c)
                 Regions[y,x,c].calc_volume(Dtotal)
                 term1 = Regions[y,x,c].phi/(Regions[y,x,c].Sig_tot[:,0].transpose() \
                                     * Regions[y,x,c].volume*Dtotal)
                 term2 = Regions[y,x,c].q*4*np.pi
                 Regions[y,x,c].phi = term1+ term2
-                print("Updated phi")
-                print(Regions[y,x,c].phi)
+                # print("Updated phi")
+                # print(Regions[y,x,c].phi)
 
 #########################################################
 ################# Condensation and CMFD ##################
@@ -374,32 +377,49 @@ for l in range(1):
         tot_FR = 0
         old_FR = 0
         tot_abs = 0
+        tot_sct = 0
    
     for y in range(NY):
         for x in range(NX):
             for c in range(n_rings+1):
-                print("y,x,c", y,x,c)
-                print(Regions[y,x,c].phi)
-                newnf = np.multiply(Regions[y,x,c].Sig_nuf.transpose(), \
-                                Regions[y,x,c].phi)
-                print(newnf)
-                oldnf = np.multiply(Regions[y,x,c].Sig_nuf.transpose(), \
-                                Regions[y,x,c].phi_old)
-                print(oldnf)
-                # newabs = np.multiply(Regions[y,x,c].Sig_abs.transpose(), \
-                #                 Regions[y,x,c].phi)
-                if CMFD == 0:
-                    tot_FR += np.sum(newnf*pitch**2)
-                    old_FR += np.sum(oldnf*pitch**2)
-                    # tot_abs += np.sum(newabs**pitch**2) 
-    
-                print("previous fr")
-                print( old_FR)
-                print("new FR")  
-                print(tot_FR)
+                # print("y,x,c", y,x,c)
+                # print(Regions[y,x,c].phi)
+                newnf = np.sum(np.multiply(Regions[y,x,c].Sig_nuf.transpose(), \
+                                Regions[y,x,c].phi))
 
+                oldnf = np.sum(np.multiply(Regions[y,x,c].Sig_nuf.transpose(), \
+                                Regions[y,x,c].phi_old))
+
+                newabs = np.sum(np.multiply(Regions[y,x,c].Sig_abs.transpose(), \
+                                Regions[y,x,c].phi))
+
+                print(Regions[y,x,c].Sig_sct.transpose())
+                newsct = np.sum(np.multiply(Regions[y,x,c].Sig_sct.transpose(), \
+                                Regions[y,x,c].phi))
+                if CMFD == 0:
+                    tot_FR += newnf*pitch**2*sidelengthZ
+                    old_FR += oldnf*pitch**2*sidelengthZ
+                    tot_abs += newabs**pitch**2*sidelengthZ
+                    tot_sct+= newsct**pitch**2*sidelengthZ
+    
+                # print("previous fr")
+                # print( old_FR)
+    print("---------------------")
+    print("old_fission rate")  
+    print(old_FR)
+    print("fission rate")  
+    print(tot_FR)
+    print("abs rate")  
+    print(tot_abs)
+    print("sct rate")  
+    print(tot_sct)
+
+    print("---------------------")
+    print("change in FR")
+    print(np.abs(tot_FR-old_FR)/old_FR)
     if CMFD == 0:
         k = tot_FR/old_FR*k_pre
+    print("actual k:",k_pre)
     print("k eff:",k)
 
     phi_new_array = np.zeros(N_REGION)
