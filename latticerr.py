@@ -95,6 +95,25 @@ for l in range(1):
     print("#########################")
     print("#####iteration",l,"######")
     print("#########################")
+    # Preset the scalar flux for testing
+
+    flux = np.array([0.0499226760038861,
+                    0.0941117498680153,
+                    0.136238653504666,
+                    0.175380313791285,
+                    0.210679077985032,
+                    0.241361506079409,
+                    0.266755316174873,
+                    0.286304111930004,
+                    0.299579570028191,
+                    0.306290821396419])
+    idx = 0
+    for y in range(NY):
+        for x in range(NX):
+            for c in range(n_rings+1):
+                Regions[y,x,c].set_phi(flux[idx])
+                idx+=1
+                print(Regions[y,x,c].phi)
 
     ##Calc Q and initialize for this loop
     FissionRate = 0
