@@ -2,6 +2,8 @@
 A toy model of applying CMFD on random MOC
 # How to run code
 `python latticerr.py`
+Set `CMFD` value to 1 to turn it on. (Only work for reflective boundary cases now)
+Set `plot` value to 1 to see the trajectories of all rays. (Note: It can be super SLOW!)
 # XS data
 Data are stored in homo_XS and XS
 For now, I have 1 group and 2 group data for homogenized slab. 
