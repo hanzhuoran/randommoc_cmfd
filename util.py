@@ -4,8 +4,8 @@ import random
 
 # Parameters to change
 DZ = 10
-MAX_D = 200
-N_RAYS = 100
+MAX_D = 300
+N_RAYS = 300
 n_fuel_ring = 0
 n_mod_ring = 0
 N_GROUPS = 1 # 10 or 2 groups or 1

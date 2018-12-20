@@ -21,6 +21,15 @@ print("We have", N_GROUPS, "energy groups")
 
 CMFD = 0
 plot = 0
+#######################################
+#############set up geometry###########
+#######################################
+
+# 1 is hetero
+# 2 is homo
+Regions, all_surf  = set_geometry(2)
+
+# #################################################
 # Plot base grids
 if plot == 1:
     print("NRINGS:",n_rings)
@@ -52,23 +61,13 @@ if plot == 1:
          plt.plot([xbd_list[0],xbd_list[-1]],
                     [NY*pitch/2-j*pitch,NY*pitch/2-j*pitch],'b-')
 
-# plt.show()
-
-#######################################
-#############set up geometry###########
-#######################################
-
-# 1 is hetero
-# 2 is homo
-Regions, all_surf  = set_geometry(2)
-
-
-########################################
-#############ITERATION##################
-########################################
+###############################################
+#############POWER ITERATION ##################
+###############################################
 
 # inital guess of k
-k = 1
+# k = 1
+k = 1.1057 # Diffusion results
 # number of iterations
 l = 0
 
@@ -82,7 +81,7 @@ conv1 = 1
 # converge on flux
 conv2 = 1
 
-
+#############################################
 # # Preset the scalar flux for testing
 # flux = np.array([0.0499228759934832,
 #                 0.0941120923671741,
@@ -100,14 +99,13 @@ conv2 = 1
 #         for c in range(n_rings+1):
 #             Regions[y,x,c].set_phi(flux[idx])
 #             idx+=1
+#############################################
 
 while not converge:
 # for l in range(1):
 
     # Fix seed
     seed()
-
-
 
     l += 1
     print("#########################")
@@ -154,9 +152,9 @@ while not converge:
         # Find the stating region of the ray 
         y, x, c = find_region(ray,Regions)
         # Assign initial angular flux by phi/4/pi or Q?? my q is Q/(4pi*sig_t)
-        init_psi = copy.deepcopy(Regions[y,x,c].q)
-        # init_psi = copy.deepcopy(Regions[y,x,c].phi_old)
-        # init_psi /= 4*np.pi
+        # init_psi = copy.deepcopy(Regions[y,x,c].q)
+        init_psi = copy.deepcopy(Regions[y,x,c].phi_old)
+        init_psi /= 4*np.pi
         init_psi = np.squeeze(np.asarray(init_psi))
         # Need to fix this. The data structure is weird for 1 group
         if N_GROUPS == 1:
@@ -262,8 +260,6 @@ while not converge:
                                     * Regions[y,x,c].volume*Dtotal)
                 term2 = Regions[y,x,c].q*4*np.pi
                 Regions[y,x,c].phi = term1+ term2
-                # print("Updated phi")
-                # print(Regions[y,x,c].phi)
 
 #########################################################
 ################# Condensation and CMFD ##################
@@ -402,26 +398,33 @@ while not converge:
                     tot_abs += newabs*pitch**2*sidelengthZ
                     tot_sct += newsct*pitch**2*sidelengthZ
 
-    # print("---------------------")
-    # # print("old_fission rate")  
-    # # print(old_FR)
-    # print("fission rate")  
-    # print(tot_FR)
-    # print("true fission rate")  
-    # print(tot_FR/k_pre)
-    # print("abs rate")  
-    # print(tot_abs)
+    print("---------------------")
+    # print("old_fission rate")  
+    # print(old_FR)
+    print("fission rate")  
+    print(tot_FR)
+    print("true fission rate")  
+    print(tot_FR/k_pre)
+    print("abs rate")  
+    print(tot_abs)
     # print("theoretical leakage")
     # print(tot_FR/k_pre-tot_abs)
-
+    # region = Regions[0,9,0]
+    # print("FR in R cell")
+    # FR = np.sum(np.multiply(region.Sig_nuf.transpose(), \
+    #                             region.phi))*pitch**2*sidelengthZ
+    # print(FR)
+    # print("ABS in R cell")
+    # ABS_R = np.sum(np.multiply(region.Sig_abs.transpose(), \
+    #                             region.phi))*pitch**2*sidelengthZ
+    # print(ABS_R)
+    # print("Leakage in R cell")
+    # L_R = FR/k_pre - ABS_R
+    # print(L_R)
     # print("Leakage")
     # print(current_filter_x)
-    # # print(current_filter_y)
-
-
     # print("check surface cnts")
     # print(tot_hit_cnt)
-
     # print("hits on every surfaces")
     # for i in range(np.size(all_surf)):
     #     print(all_surf[i].cnt)
@@ -429,10 +432,15 @@ while not converge:
     print("---------------------")
     print("--------Update k----------")
     print("---------------------")
-    print("change in FR")
-    print(np.abs(tot_FR-old_FR)/old_FR)
+    Leakage_R = current_filter_x[-1]/(all_surf[NX].cnt/2)
+    Leakage_L = current_filter_x[0]/(all_surf[0].cnt/2)
+    L = Leakage_R - Leakage_L
+    print("Calculated Leakage")
+    print(L)
+
     if CMFD == 0:
-        k = tot_FR/old_FR*k_pre
+        # k = tot_FR/old_FR*k_pre
+        k = tot_FR/(L+tot_abs)
     print("pre k:",k_pre)
     print("k eff:",k)
 
@@ -455,24 +463,13 @@ while not converge:
     conv1 = np.abs((k-k_pre)/k)
     conv2 = np.linalg.norm((phi_new_array-phi_old_array)/phi_new_array)
 
-    # print("K_ERR",conv1)
-    # print("flux",conv2)
-    # print("thermal_err",conv3)
+    print("k_err",conv1)
+    print("flux_err",conv2)
     # print("RMSD:", RMSD)
-    # print("k_pre:", k_pre)
-    # print("k_poweriteration:", k)
 
 
     if conv1< 1e-5 and conv2 < 1e-5:
         converge = 1
-        # CMFD = 0
-        # if l < CMFD_iter:
-        #     CMFD_iter = l
-        #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        #     print("####K converged",CMFD_iter,"#####")
-        #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        # if RMSD < conv_crit2:
-        #     converge = 1
 
     # Normalization
     sum = 0
@@ -481,9 +478,6 @@ while not converge:
             for c in range(n_rings+1):
                 sum += np.sum(Regions[y,x,c].phi)
     norm = sum/(NY*NX*(n_rings+1)*N_GROUPS)
-    # print("norm")
-    # print(norm)
-
 
     for y in range(NY):
         for x in range(NX):

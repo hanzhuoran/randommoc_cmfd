@@ -2,17 +2,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 from util import *
 
-
+# k = 1.10568
 phidf = np.array([0.0499228759934832,0.0941120923671741,0.136239071905262,0.175380726724590,\
     0.210679405146194,0.241361683844689,0.266755309974487,0.286303922970518,0.299579235057431,0.306290405556839])
-phirr = np.array([0.27245382,0.48566274,0.68252428,0.86402302,1.0236056,1.16100592,\
+# k = 1.06048 
+phirrF = np.array([0.27245382,0.48566274,0.68252428,0.86402302,1.0236056,1.16100592,\
     1.27493175,1.36304535,1.42169127,1.4510881])
+# k = 1.08461
+phirrL = np.array([0.27221076,0.48522969,0.68191615,0.86325392,1.02269544,1.15997473,\
+ 1.27380052,1.36183697,1.42043166,1.44980284])
+
 phidf = phidf/np.linalg.norm(phidf)
-phirr = phirr/np.linalg.norm(phirr)
+phirrF = phirrF/np.linalg.norm(phirrF)
+phirrL = phirrL/np.linalg.norm(phirrL)
 axis = 1/2*(xbd_list[0:-1]+xbd_list[1:NX+1])
 print(axis)
 plt.plot(axis,phidf,label="diffusion")
-plt.plot(axis,phirr,label="random")
+plt.plot(axis,phirrF,'rx-',label="Fission iteration")
+plt.plot(axis,phirrL,'bo-',label="Leakage iteration")
 plt.legend()
 plt.show()
 # plotphi1 = np.flipud(plotphi1)
